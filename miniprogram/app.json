@@ -1,0 +1,51 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/content/content",
+    "pages/leads/leads",
+    "pages/upload/upload",
+    "src/pages/account-center/profile",
+    "pages/detail/detail"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#1a365d",
+    "navigationBarTitleText": "博雅敏格",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f0f2f5",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#6b7280",
+    "selectedColor": "#1a365d",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/content/content",
+        "text": "内容确认",
+        "iconPath": "images/tab_content.png",
+        "selectedIconPath": "images/tab_content_active.png"
+      },
+      {
+        "pagePath": "pages/leads/leads",
+        "text": "我的线索",
+        "iconPath": "images/tab_leads.png",
+        "selectedIconPath": "images/tab_leads_active.png"
+      },
+      {
+        "pagePath": "pages/upload/upload",
+        "text": "素材上传",
+        "iconPath": "images/tab_upload.png",
+        "selectedIconPath": "images/tab_upload_active.png"
+      },
+      {
+        "pagePath": "src/pages/account-center/profile",
+        "text": "我的",
+        "iconPath": "images/tab_profile.png",
+        "selectedIconPath": "images/tab_profile_active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

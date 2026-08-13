@@ -1,0 +1,24 @@
+groups:
+  - name: boyamingge
+    rules:
+      - alert: BoyaminggeApiDown
+        expr: up{job="boyamingge-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "博雅敏格 API 不可用"
+      - alert: BoyaminggeHighServerErrorRate
+        expr: sum(rate(boyamingge_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(boyamingge_http_requests_total[5m])), 0.001) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "博雅敏格 API 5xx 比例超过 5%"
+      - alert: BoyaminggeSlowApi
+        expr: histogram_quantile(0.95, sum by (le) (rate(boyamingge_http_request_duration_seconds_bucket[5m]))) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "博雅敏格 API P95 延迟超过 2 秒"

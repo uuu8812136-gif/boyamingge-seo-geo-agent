@@ -1,0 +1,8 @@
+/* 全局样式 · 博雅敏格经销商工作台 */
+page {
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #1a2332;
+  font-size: 28rpx;
+  line-height: 1.5;
+}

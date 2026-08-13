@@ -1,0 +1,40 @@
+<view class="login-page">
+  <!-- 顶部品牌 LOGO 区域 -->
+  <view class="logo-wrap">
+    <view class="logo-text">博雅敏格</view>
+    <view class="logo-sub">经销商工作台</view>
+  </view>
+
+  <!-- 登录卡片 -->
+  <view class="card">
+    <view class="form-item">
+      <input
+        class="input"
+        type="text"
+        placeholder="经销商账号"
+        placeholder-class="placeholder"
+        value="{{username}}"
+        data-field="username"
+        bindinput="onInput"
+      />
+    </view>
+    <view class="form-item">
+      <input
+        class="input"
+        password="{{true}}"
+        placeholder="请输入密码"
+        placeholder-class="placeholder"
+        value="{{password}}"
+        data-field="password"
+        bindinput="onInput"
+      />
+    </view>
+    <view
+      class="btn-login {{loading ? 'btn-loading' : ''}}"
+      bindtap="onLogin"
+    >{{loading ? '登录中...' : '登录'}}</view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="tip">测试账号: dealer_gz / dealer123</view>
+</view>

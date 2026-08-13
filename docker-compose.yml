@@ -1,0 +1,208 @@
+name: boyaminge-seo-geo
+
+# 公共日志配置锚点
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-boyamingge}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"   # 仅本地访问，生产可移除
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"   # 仅本地访问，生产可移除
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    logging: *default-logging
+
+  fastapi:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:change-me-local-db@postgres:5432/boyamingge}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      APP_ENV: ${APP_ENV:-development}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-in-production}
+      OAUTH2_CLIENT_ID: ${OAUTH2_CLIENT_ID:-boyamingge-client}
+      OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET:-boyamingge-secret}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      SITE_BASE_URL: ${SITE_BASE_URL:-http://localhost}
+      ROOT_DOMAIN: ${NEXT_PUBLIC_ROOT_DOMAIN:-boyamingge.com}
+      ENABLE_CITY_PATH_REDIRECT: ${ENABLE_CITY_PATH_REDIRECT:-false}
+      LLM_MOCK_MODE: ${LLM_MOCK_MODE:-true}
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_API_BASE: ${DEEPSEEK_API_BASE:-https://api.deepseek.com/v1}
+      METRICS_PROVIDER: ${METRICS_PROVIDER:-mock}
+      BAIDU_TONGJI_TOKEN: ${BAIDU_TONGJI_TOKEN:-}
+      BAIDU_TONGJI_SITE_ID: ${BAIDU_TONGJI_SITE_ID:-}
+      HOTLINE_PROVIDER: ${HOTLINE_PROVIDER:-mock}
+      TIANRUN_API_KEY: ${TIANRUN_API_KEY:-}
+      TIANRUN_API_BASE: ${TIANRUN_API_BASE:-}
+      TIANRUN_AGENT_ID: ${TIANRUN_AGENT_ID:-}
+      TIANRUN_EXT_ID: ${TIANRUN_EXT_ID:-}
+      DISTRIBUTE_MODE: ${DISTRIBUTE_MODE:-mock}
+      WORKBENCH_BASE_URL: ${WORKBENCH_BASE_URL:-http://localhost/workbench}
+      PACKAGES_BASE_URL: ${PACKAGES_BASE_URL:-http://localhost/packages}
+      ALLOW_MOCK_PROVIDERS_IN_PRODUCTION: ${ALLOW_MOCK_PROVIDERS_IN_PRODUCTION:-false}
+      MOCK_SCENARIO: ${MOCK_SCENARIO:-empty}
+      MATERIAL_UPLOAD_DIR: /app/uploads
+      SYNAPSE_COOKIE_DIR: /app/data/synapse_cookies
+      INITIAL_ADMIN_USERNAME: ${INITIAL_ADMIN_USERNAME:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${FASTAPI_PORT:-8000}:8000"   # 仅本地调试，生产走 nginx
+    volumes:
+      - uploads_data:/app/uploads
+      - synapse_cookies_data:/app/data/synapse_cookies
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+    command: >
+      sh -c "alembic upgrade head &&
+             python scripts/bootstrap_admin.py --require-in-production &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  nextjs:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+        NEXT_PUBLIC_ROOT_DOMAIN: ${NEXT_PUBLIC_ROOT_DOMAIN:-boyamingge.com}
+        NEXT_PUBLIC_ADMIN_URL: ${NEXT_PUBLIC_ADMIN_URL:-https://admin.boyamingge.com}
+        NEXT_PUBLIC_CITY_DOMAIN_MODE: ${NEXT_PUBLIC_CITY_DOMAIN_MODE:-path}
+        NEXT_PUBLIC_ENABLE_CITY_PATH_REDIRECT: ${NEXT_PUBLIC_ENABLE_CITY_PATH_REDIRECT:-false}
+    environment:
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+      INTERNAL_API_URL: http://fastapi:8000
+      API_PROXY_TARGET: http://fastapi:8000
+      REDIS_URL: ${CUSTOMER_SERVICE_REDIS_URL:-redis://redis:6379/1}
+      AMAP_WEB_SERVICE_KEY: ${AMAP_WEB_SERVICE_KEY:-}
+      AI_CUSTOMER_SERVICE_API_URL: ${AI_CUSTOMER_SERVICE_API_URL:-}
+      AI_CUSTOMER_SERVICE_API_KEY: ${AI_CUSTOMER_SERVICE_API_KEY:-}
+      AI_CUSTOMER_SERVICE_MODEL: ${AI_CUSTOMER_SERVICE_MODEL:-customer-service-default}
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3002:3000"   # 仅本地调试
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ && wget -q -O /dev/null http://127.0.0.1:3000/api/customer-service/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+      # - "443:443"   # 生产 HTTPS 时取消注释
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+      # - ./nginx/certs:/etc/nginx/certs:ro   # 生产 HTTPS 证书挂载
+    depends_on:
+      fastapi:
+        condition: service_healthy
+      nextjs:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    logging: *default-logging
+
+  prometheus:
+    image: prom/prometheus:v3.6.0
+    profiles: ["monitoring"]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    profiles: ["monitoring"]
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml"]
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "127.0.0.1:${ALERTMANAGER_PORT:-9093}:9093"
+    restart: unless-stopped
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    profiles: ["monitoring"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3101}:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+  synapse_cookies_data:
+  prometheus_data:
+  grafana_data:

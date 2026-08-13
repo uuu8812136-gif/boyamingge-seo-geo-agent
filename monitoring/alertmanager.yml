@@ -1,0 +1,10 @@
+route:
+  receiver: default
+  group_by: [alertname]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: default
+    # 生产上线时在此配置企业微信、邮件或 webhook 接收器。

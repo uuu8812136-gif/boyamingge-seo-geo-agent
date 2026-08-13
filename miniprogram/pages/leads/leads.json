@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的线索",
+  "navigationBarBackgroundColor": "#1a365d",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" fill="none">
+  <rect width="800" height="600" fill="#eceae6"/>
+  <rect x="120" y="80" width="560" height="400" rx="4" fill="#d8d4cc" stroke="#c4bfb5" stroke-width="2"/>
+  <rect x="200" y="140" width="180" height="280" fill="#f5f3f0" stroke="#b8b2a8" stroke-width="2"/>
+  <rect x="420" y="140" width="180" height="280" fill="#f5f3f0" stroke="#b8b2a8" stroke-width="2"/>
+  <line x1="290" y="140" x2="290" y="420" stroke="#b8b2a8" stroke-width="2"/>
+  <line x1="510" y="140" x2="510" y="420" stroke="#b8b2a8" stroke-width="2"/>
+  <text x="400" y="530" text-anchor="middle" fill="#8a847a" font-family="sans-serif" font-size="18">��b���H�gG</text>
+</svg>

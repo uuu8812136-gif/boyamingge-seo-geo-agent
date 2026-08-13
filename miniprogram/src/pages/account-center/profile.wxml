@@ -1,0 +1,82 @@
+<view class="profile-page">
+  <view class="loading-wrap" wx:if="{{loading}}" style="padding-top:200rpx;">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:elif="{{profile}}">
+    <view class="header-card">
+      <view class="user-info">
+        <view class="avatar">{{avatarText}}</view>
+        <view>
+          <view class="user-name">{{profile.name}}</view>
+          <view class="user-role">{{profile.city}} · {{profile.dealer_code}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="info-card">
+      <view class="info-title">联系信息</view>
+      <view class="info-row">
+        <text class="info-label">联系电话</text>
+        <text class="info-value">{{profile.phone || '未设置'}}</text>
+      </view>
+      <view class="info-row" wx:if="{{profile.baijiahao_account}}">
+        <text class="info-label">百家号账号</text>
+        <text class="info-value">{{profile.baijiahao_account}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">激活积分</text>
+        <text class="info-value">{{profile.activation_score || 0}} 分</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">账号状态</text>
+        <text class="info-value" style="color:#059669;">{{statusText}}</text>
+      </view>
+    </view>
+
+    <view class="info-card" wx:if="{{stats}}">
+      <view class="info-title">数据统计</view>
+      <view class="stats-row">
+        <view class="stat-block">
+          <view class="stat-num">{{stats.total_publications || 0}}</view>
+          <view class="stat-label">内容总数</view>
+        </view>
+        <view class="stat-block">
+          <view class="stat-num warn">{{stats.pending || 0}}</view>
+          <view class="stat-label">待确认</view>
+        </view>
+        <view class="stat-block">
+          <view class="stat-num success">{{stats.confirmed || 0}}</view>
+          <view class="stat-label">已确认</view>
+        </view>
+        <view class="stat-block">
+          <view class="stat-num">{{stats.total_leads || 0}}</view>
+          <view class="stat-label">线索总数</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="menu-card">
+      <view class="menu-item" bindtap="goToContent" hover-class="menu-item-hover" hover-stay-time="100">
+        <text class="menu-icon">📋</text>
+        <text class="menu-text">内容确认</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="goToLeads" hover-class="menu-item-hover" hover-stay-time="100">
+        <text class="menu-icon">👥</text>
+        <text class="menu-text">线索管理</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="goToUpload" hover-class="menu-item-hover" hover-stay-time="100">
+        <text class="menu-icon">📷</text>
+        <text class="menu-text">素材上传</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="logout-btn" bindtap="onLogout" hover-class="logout-btn-hover">退出登录</view>
+
+    <view class="version">博雅敏格经销商工作台 v1.0</view>
+  </block>
+</view>

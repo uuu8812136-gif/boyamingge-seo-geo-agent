@@ -1,0 +1,69 @@
+<view class="leads-page">
+  <view class="stat-card">
+    <view class="stat-item">
+      <view class="stat-num">{{total || list.length || 0}}</view>
+      <view class="stat-label">总线索</view>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <view class="stat-num" style="color:#fde68a;">{{newCount || 0}}</view>
+      <view class="stat-label">新线索</view>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <view class="stat-num" style="color:#a7f3d0;">{{convertedCount || 0}}</view>
+      <view class="stat-label">已成交</view>
+    </view>
+  </view>
+
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <block wx:elif="{{!isEmpty}}">
+    <view class="list-area">
+      <view class="lead-card" wx:for="{{list}}" wx:key="lead_id">
+        <view class="lead-header">
+          <view>
+            <text class="lead-name">{{item.name}}</text>
+            <text style="font-size:26rpx;color:#5a6475;margin-left:16rpx;">{{item.phone_masked || item.phone || ''}}</text>
+          </view>
+          <text class="tag {{item.statusCls}}">{{item.statusText}}</text>
+        </view>
+
+        <view class="lead-info">
+          <view class="info-row" wx:if="{{item.city}}">
+            <text class="info-label">城市：</text>
+            <text>{{item.city}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.interest}}">
+            <text class="info-label">兴趣：</text>
+            <text>{{item.interest}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.sourceText}}">
+            <text class="info-label">来源：</text>
+            <text>{{item.sourceText}}</text>
+          </view>
+        </view>
+
+        <view class="lead-note" wx:if="{{item.note}}">{{item.note}}</view>
+        <view class="lead-time">{{item.created_at || ''}}</view>
+
+        <view class="lead-actions" wx:if="{{item.status !== 'converted'}}">
+          <view class="action-label">更新状态</view>
+          <view class="action-btns">
+            <view class="status-btn {{item.status === 'new' ? 'active' : ''}}" data-id="{{item.lead_id}}" data-status="new" bindtap="updateStatus" wx:if="{{item.status !== 'new'}}">新线索</view>
+            <view class="status-btn {{item.status === 'contacted' ? 'active' : ''}}" data-id="{{item.lead_id}}" data-status="contacted" bindtap="updateStatus">已联系</view>
+            <view class="status-btn {{item.status === 'converted' ? 'active' : ''}}" data-id="{{item.lead_id}}" data-status="converted" bindtap="updateStatus">已成交</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="empty-wrap" wx:else>
+    <view class="empty-icon-box">📭</view>
+    <view class="empty-text">暂无线索</view>
+  </view>
+</view>

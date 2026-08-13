@@ -1,0 +1,55 @@
+<!-- 素材上传页 -->
+<view class="upload-page">
+  <view class="head-card">
+    <view class="head-title">素材上传</view>
+    <view class="head-desc">拍照或从相册选择图片上传，用于门店展示和内容创作素材</view>
+  </view>
+
+  <view class="upload-area">
+    <view class="upload-btn" bindtap="chooseImage" data-source="camera" hover-class="upload-btn-hover">
+      <text class="upload-icon">📷</text>
+      <text class="upload-label">拍照上传</text>
+      <text class="upload-sub">现场拍摄素材</text>
+    </view>
+    <view class="upload-btn" bindtap="chooseImage" data-source="album" hover-class="upload-btn-hover">
+      <text class="upload-icon">🖼️</text>
+      <text class="upload-label">从相册选择</text>
+      <text class="upload-sub">选取已有照片</text>
+    </view>
+  </view>
+
+  <!-- 上传进度 -->
+  <view class="section-card" wx:if="{{uploading}}" style="margin:0 24rpx;background:#fff;border-radius:12rpx;padding:24rpx;">
+    <view style="display:flex;align-items:center;margin-bottom:12rpx;">
+      <view class="loading-spinner" style="width:32rpx;height:32rpx;border-width:3rpx;margin-right:16rpx;margin-bottom:0;"></view>
+      <text style="font-size:26rpx;color:#1a2332;">上传中 {{uploadProgress}}%</text>
+    </view>
+    <view style="height:8rpx;background:#e8ecf1;border-radius:4rpx;overflow:hidden;">
+      <view style="height:100%;background:#1a365d;width:{{uploadProgress}}%;border-radius:4rpx;transition:width 0.3s;"></view>
+    </view>
+  </view>
+
+  <view class="grid-area">
+    <view class="section-title">已上传素材<text wx:if="{{list.length}}" style="color:#8c95a6;font-weight:normal;font-size:24rpx;margin-left:8rpx;">({{list.length}}个)</text></view>
+
+    <view class="loading-wrap" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view class="empty-wrap" wx:elif="{{isEmpty}}">
+      <view class="empty-icon-box">📂</view>
+      <text class="empty-text">暂无素材，点击上方按钮上传</text>
+    </view>
+
+    <view class="grid" wx:else>
+      <view class="grid-item" wx:for="{{list}}" wx:key="material_id" data-url="{{item.oss_url || item.url || item.thumbnail}}" bindtap="onPreview">
+        <view class="media-wrap">
+          <image class="media-img" src="{{item.oss_url || item.url || item.thumbnail}}" mode="aspectFill"></image>
+        </view>
+        <view class="media-type-tag">{{item.type || '图片'}}</view>
+        <view class="media-status status-{{item.status || 'pending'}}">{{item.status === 'approved' ? '已审核' : item.status === 'rejected' ? '已驳回' : '待审核'}}</view>
+      </view>
+    </view>
+  </view>
+</view>
